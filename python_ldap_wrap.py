@@ -98,8 +98,8 @@ def get_results(l, r_id):
 def modify(existing_dn, before_dict, after_dict):
     '''wraps the _modify method. cleans up.'''
     ldap_obj = connect()
-    r_id = modify(ldap_obje, existing_dn, before_dict, after_dict)
-    results = ldap_obj.results(r_id)
+    r_id = _modify(ldap_obj, existing_dn, before_dict, after_dict)
+    results = ldap_obj.result(r_id)
     return results
 
 def search(search, search_params={}):

@@ -13,8 +13,8 @@ class credentials(object):
         '''init method.'''
         #default values.
         self.creds = {
-            'server':'idmdevl.oit.pdx.edu',
-            'username':'uid=magarvey,ou=people,dc=pdx,dc=edu',
+            'server':'',
+            'username':'',
             'password':'',
         }
         #check for conf file.
@@ -184,11 +184,6 @@ def search(search_in, search_params={}, creds_obj=None):
 
         @params:
             search - the search filter/s.'''
-
-    #debug
-    #print 'search_in:{}\n\ttype:{}'.format(search_in,type(search_in))
-    #print 'search_params:{}\n\ttype:{}'.format(search_params,type(search_params))
-    #print 'creds_obj:{}\n\ttype:{}'.format(creds_obj,type(creds_obj))
 
     if creds_obj is not None:
         try:

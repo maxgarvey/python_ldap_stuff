@@ -84,7 +84,7 @@ def connect(creds_obj=my_creds):
 
     try:
         l = ldap.open(creds_obj.creds['server'])
-        print "binding to server: {}".format(creds_obj.creds['server'])
+        print "binding to server: {}".format(creds_obj.creds['server']) #debug
         l.simple_bind_s(my_creds.creds['username'], my_creds.creds['password'])
         return l
     except Exception, error:

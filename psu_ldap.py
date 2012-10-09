@@ -217,7 +217,7 @@ def modify_rdn(existing_dn, modification, creds_obj=None, delete_orig=True):
     if creds_obj is not None:
         try:
             ldap_obj = connect(creds_obj)
-        except Exception, err:
+        except Exception, error:
             print 'error with specified config: {0}\n\t{1}'\
                 .format(Exception, error)
             try:

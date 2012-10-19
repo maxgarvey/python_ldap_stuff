@@ -3,6 +3,9 @@ import ldap.modlist as modlist
 import ldap
 import os
 
+import logging
+__logger__ = logging.getLogger(__name__)
+
 ######
 '''this is the "conf" section'''
 ######
@@ -18,13 +21,12 @@ class credentials(object):
             'password':'',
         }
         #check for conf file.
-        #print 'cwd: {0}'.format(os.getcwd()) #debug
         if 'conf.py' in os.listdir(os.getcwd()):
             from conf import conf
             self.edit_creds(conf['username'],
                 conf['password'], conf['server'])
             del(conf)
-            print('creds.py file found. setting credentials accordingly:'+\
+            __logger__.debug('creds.py file found. setting credentials accordingly:'+\
                 '\ncreds = {0}'.format(self.creds))
 
     def __str__(self):
@@ -71,7 +73,7 @@ class credentials(object):
 
 #default object created
 my_creds = credentials()
-print 'my_creds: {0}'.format(my_creds)  #debug
+__logger__.debug('my_creds: {0}'.format(my_creds))  #debug
 
 ######
 '''here are some methods to facilitate a subset of ldap operations.'''
@@ -86,13 +88,13 @@ def connect(creds_obj=my_creds):
 
     try:
         l = ldap.open(creds_obj.creds['server'])
-        print "binding to server: {0}".format(creds_obj.creds['server']) #debug
-        print 'creds: {0}'.format(creds_obj) #debug
+        __logger__.debug("binding to server: {0}".format(creds_obj.creds['server'])) #debug
+        __logger__.debug('creds: {0}'.format(creds_obj)) #debug
         l.simple_bind_s(my_creds.creds['username'], my_creds.creds['password'])
-        print 'bound to server' #debug
+        __logger__.debug('bound to server') #debug
         return l
     except Exception, error:
-        print "error connecting to server: {0}\n\t{1}".format(creds_obj.creds['server'], error)
+        __logger__.debug("error connecting to server: {0}\n\t{1}".format(creds_obj.creds['server'], error))
         return None
 
 def disconnect(l, delete=False):
@@ -122,7 +124,7 @@ def _modify(l, existing_dn, before_change_dict, after_change_dict):
         r_id = l.modify(existing_dn, this_modlist)
         return r_id
     except Exception, error:
-        print("error performing modify transaction: {0}\n\t{1}"\
+        __logger__.info("error performing modify transaction: {0}\n\t{1}"\
             .format(Exception, error))
         return None
 
@@ -139,7 +141,7 @@ def _modify_rdn(l, existing_dn, modification, delete_orig):
         r_id = l.modrdn(existing_dn, modification, delete_orig)
         return r_id
     except Exception, error:
-        print('error performing modify_rdn transaction: {0}\n\t{1}'\
+        __logger__.info('error performing modify_rdn transaction: {0}\n\t{1}'\
             .format(Exception, error))
         return None
 
@@ -153,7 +155,7 @@ def _search(l, search, baseDN='ou=people,dc=pdx,dc=edu', scope=ldap.SCOPE_SUBTRE
                 name to search from.
             scope(=ldap.SCOPE_SUBTREE) - the type of search scope to use.'''
 
-    #print 'search: {0}, type(search): {1}'.format(search, type(search)) #debug
+    __logger__.debug('search: {0}, type(search): {1}'.format(search, type(search))) #debug
 
     if type(search) == str:
         r_id = l.search(baseDN, scope, search)
@@ -166,7 +168,7 @@ def _search(l, search, baseDN='ou=people,dc=pdx,dc=edu', scope=ldap.SCOPE_SUBTRE
         r_id = l.search(baseDN, scope, search)
         return r_id
     else:
-        print "the second parameter must be a string or list of strings."
+        __logger__.debug("the second parameter must be a string or list of strings.")
         return None
 
 def get_results(l, r_id):
@@ -179,7 +181,7 @@ def get_results(l, r_id):
     try:
         return l.result(r_id)
     except Exception, error:
-        print("Error retrieving results:{0}\n\t{1}".format(Exception, error))
+        __logger__.info("Error retrieving results:{0}\n\t{1}".format(Exception, error))
 
 def modify(existing_dn, before_dict, after_dict, creds_obj=None):
     '''wraps the _modify method. cleans up.
@@ -194,13 +196,13 @@ def modify(existing_dn, before_dict, after_dict, creds_obj=None):
         try:
             ldap_obj = connect(creds_obj)
         except Exception, err:
-            print 'error with specified config: {0}\n\t{1}'\
-                .format(Exception, error)
+            __logger__.info('error with specified config: {0}\n\t{1}'\
+                .format(Exception, error))
             try:
                 ldap_obj = connect()
             except Exception, error:
-                print 'error with default config: {0}\n\t{1}'\
-                    .format(Exception, error)
+                __logger__.info('error with default config: {0}\n\t{1}'\
+                    .format(Exception, error))
     r_id = _modify(ldap_obj, existing_dn, before_dict, after_dict)
     results = ldap_obj.result(r_id)
     return results
@@ -218,13 +220,13 @@ def modify_rdn(existing_dn, modification, creds_obj=None, delete_orig=True):
         try:
             ldap_obj = connect(creds_obj)
         except Exception, error:
-            print 'error with specified config: {0}\n\t{1}'\
-                .format(Exception, error)
+            __logger__.info('error with specified config: {0}\n\t{1}'\
+                .format(Exception, error))
             try:
                 ldap_obj = connect()
             except Exception, error:
-                print 'error with default config: {0}\n\t{1}'\
-                    .format(Exception, error)
+                __logger__.info('error with default config: {0}\n\t{1}'\
+                    .format(Exception, error))
     r_id = _modify_rdn(ldap_obj, existing_dn, modification, delete_orig)
     results = ldap_obj.result(r_id)
     return results
@@ -239,13 +241,13 @@ def search(search_in, search_params={}, creds_obj=None):
         try:
             ldap_obj = connect(creds_obj)
         except Exception, error:
-            print 'error with specified config: {0}\n\t{1}'\
-                .format(Exception, error)
+            __logger__.debug('error with specified config: {0}\n\t{1}'\
+                .format(Exception, error))
             try:
                 ldap_obj = connect()
             except Exception, error:
-                print 'error with default config: {0}\n\t{1}'\
-                    .format(Exception, error)
+                __logger__.debug('error with default config: {0}\n\t{1}'\
+                    .format(Exception, error))
 
     has_base_dn = False
     has_scope = False
@@ -277,5 +279,5 @@ def search(search_in, search_params={}, creds_obj=None):
     #retrieve results
     results = get_results(ldap_obj, r_id)
     disconnect(ldap_obj, True)
-    print 'results: {0}'.format(results) #debug
+    __logger__.debug('results: {0}'.format(results)) #debug
     return results
